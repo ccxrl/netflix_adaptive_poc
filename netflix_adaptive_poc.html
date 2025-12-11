@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Netflix PoC - Locus of Control</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .hide-scroll::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scroll {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .row-poster {
+            transition: transform 450ms;
+        }
+        .row-poster:hover {
+            transform: scale(1.08);
+            opacity: 1;
+            z-index: 10;
+        }
+        
+        .mode-b-active { border-top: 4px solid #46d369; }
+        .mode-a-active { border-top: 4px solid transparent; }
+
+        .toggle-checkbox:checked {
+            transform: translateX(100%);
+            border-color: #46d369;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #46d369;
+        }
+    </style>
+</head>
+<body class="bg-[#141414] text-white font-sans overflow-x-hidden">
+
+    <nav class="fixed w-full z-50 top-0 transition-all duration-500 bg-black/90 px-4 md:px-8 py-4 flex items-center justify-between">
+        <div class="flex items-center gap-8">
+            <h1 class="text-[#e50914] text-2xl md:text-3xl font-bold cursor-pointer">NETFLIX</h1>
+            <ul class="hidden md:flex gap-4 text-sm text-gray-300">
+                <li class="hover:text-white cursor-pointer font-bold">Home</li>
+                <li class="hover:text-white cursor-pointer">TV Shows</li>
+                <li class="hover:text-white cursor-pointer">Movies</li>
+                <li class="hover:text-white cursor-pointer">New & Popular</li>
+            </ul>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <div class="text-right hidden sm:block">
+                <p class="text-[10px] uppercase font-bold tracking-widest text-gray-400">Algorithm Control</p>
+                <p id="mode-status" class="text-xs font-bold text-white">Match History (Agent)</p>
+            </div>
+            
+            <div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+                <input type="checkbox" name="toggle" id="mode-toggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer transition-all duration-300 left-0" onchange="toggleMode()"/>
+                <label for="mode-toggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-600 cursor-pointer"></label>
+            </div>
+            
+            <img src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png" class="w-8 h-8 rounded cursor-pointer">
+        </div>
+    </nav>
+
+    <header class="relative h-[80vh] w-full bg-[url('https://images7.alphacoders.com/550/550739.jpg')] bg-cover bg-center">
+        <div class="absolute inset-0 bg-gradient-to-t from-[#141414] via-transparent to-black/60"></div>
+        <div class="absolute inset-0 bg-gradient-to-r from-black/80 via-transparent to-transparent"></div>
+        
+        <div class="absolute top-[30%] left-8 md:left-16 max-w-xl">
+            <h1 id="hero-title" class="text-5xl md:text-6xl font-black drop-shadow-lg mb-4">INTERSTELLAR</h1>
+            <p id="hero-desc" class="text-base md:text-lg text-gray-200 drop-shadow-md mb-6 line-clamp-3">
+                When Earth becomes uninhabitable in the future, a farmer and ex-NASA pilot, Joseph Cooper, is tasked to pilot a spacecraft, along with a team of researchers, to find a new planet for humans.
+            </p>
+            <div class="flex gap-4">
+                <button class="flex items-center gap-2 bg-white text-black px-6 py-2 rounded font-bold hover:bg-opacity-80 transition">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> Play
+                </button>
+                <button class="flex items-center gap-2 bg-gray-500/70 text-white px-6 py-2 rounded font-bold hover:bg-opacity-50 transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> 
+                    More Info
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main id="rows-container" class="relative -mt-32 z-10 pb-20 pl-4 md:pl-16 space-y-8">
+        </main>
+
+    <footer class="p-8 text-center text-gray-500 text-sm">
+        <p>CS412 Argumentative Prototype • Locus of Control Demonstration</p>
+    </footer>
+
+    <script>
+        const modeARows = [
+            {
+                title: "Because you watched Interstellar",
+                movies: [
+                    { t: "Gravity", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS15NQ2UTGIfTTTJYFCBXxakUhWUqrtxCoUvKd_3Cz-mJ5oVXlhGqwKyne1khUtIXeduEqG&s=10" },
+                    { t: "The Martian", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQc0qlHjV_t3GepTV7iucgKgGTPin-Ay50sHhLIxyT2vRfPrhkX9M6L5s6HMy76uZKelD6VNA&s=10" },
+                    { t: "Ad Astra", img: "https://play-lh.googleusercontent.com/HfKa-O9TMtbyRMT7tZQ_zc3tbF0QN3KRN7QOVuAG2oAdJmFfhv48qi0k0h7aALWJjN2pT_Iefl5w6WWZw8Y" },
+                    { t: "Arrival", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQuddudrqI8a1VIUdiR63xk6spO0KOUqcM4K7wqJ-Ze1dv0RbTioawsB3oWiJC_KT0aaEYj&s=10" },
+                    { t: "Moon", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcROwCEjascjM3fGVVxqJcIWtvubd06LqvofBO38tVhs9m5cNCnSMDjEQxAMVdb6fMAddAvo&s=10" },
+                    { t: "Oblivion", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRg4lAVOT2LGu_v6bP2QO3HjxnzMJn-wT0pgZwr1i8c0L1IMxzSt1B7aaR7lf8ip8P5SzAh&s=10" },
+                    { t: "Contact", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSHeMH_6hoiag8979JEMKTLxCOnZRG_ArNm42YUajoFm4-bRj2JbXDBua2D6SZbNHc2Ym-bPA&s=10" }
+                ]
+            },
+            {
+                title: "Top Sci-Fi & Action for You",
+                movies: [
+                    { t: "Inception", img: "https://m.media-amazon.com/images/I/81p+xe8cbnL._AC_UF894,1000_QL80_.jpg" },
+                    { t: "Dune", img: "https://media.philstar.com/photos/2024/02/27/timothee-chalamet-dune-part-two_2024-02-27_19-13-33.jpg" },
+                    { t: "Tenet", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTYoAGfY4ffCXIoBdPYfxypbrvpGxQ5FA6w0r3ihzqzMZ5kxMaPXWGE50muitVS2CULBCdGvg&s=10" },
+                    { t: "Blade Runner", img: "https://preview.redd.it/n2lyqv39wsr71.jpg?width=640&crop=smart&auto=webp&s=0f3ddd53816e5fff4e1fadb6dd845b8a1be6fb4a" },
+                    { t: "The Matrix", img: "https://static.wikia.nocookie.net/matrix/images/5/5a/The_Matrix_Reloaded_digital_release_cover.jpg/revision/latest?cb=20210908111326" },
+                    { t: "Minority Report", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcShClZMAr-C9TuGWSWcKX3cdhe2JB_jYr08a2QCKZxBORZAluzedgamagz5mRWJUvUGJr-smA&s=10" },
+                    { t: "Total Recall", img: "https://m.media-amazon.com/images/M/MV5BYzU1YmJjMGEtMjY4Yy00MTFlLWE3NTUtNzI3YjkwZTMxZjZmXkEyXkFqcGdeQXVyNDc2NjEyMw@@._V1_.jpg" }
+                ]
+            },
+            {
+                title: "Cyberpunk & Dystopia",
+                movies: [
+                    { t: "Altered Carbon", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcShClZMAr-C9TuGWSWcKX3cdhe2JB_jYr08a2QCKZxBORZAluzedgamagz5mRWJUvUGJr-smA&s=10" },
+                    { t: "Ghost in the Shell", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSxwU4i2L036Pk4oQF2QC19spB6PV73I3QvlbebW1xa00Oj9NKni8IbsZR_p6vBY1_W9qZkhA&s=10" },
+                    { t: "Alita: Battle Angel", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT4avNpJkPaJEnKznHA1FxS_C7GIAH2ziXkpaUz5cDC7adkmHXzBAnh7Y_e-PCPT6HdEIgk&s=10" },
+                    { t: "Ready Player One", img: "https://m.media-amazon.com/images/M/MV5BY2JiYTNmZTctYTQ1OC00YjU4LWEwMjYtZjkwY2Y5MDI0OTU3XkEyXkFqcGdeQXVyNTI4MzE4MDU@._V1_.jpg" },
+                    { t: "Elysium", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS6y2s4SIDYeYiwR1V34_v4qP9Ji0Zfo2tftvY-8Jvk98ECDKO6T1IYAEMqnorcr4DfqNrP&s=10" },
+                    { t: "Mad Max", img: "https://m.media-amazon.com/images/M/MV5BN2EwM2I5OWMtMGQyMi00Zjg1LWJkNTctZTdjYTA4OGUwZjMyXkEyXkFqcGdeQXVyMTMxODk2OTU@._V1_FMjpg_UX1000_.jpg" }
+                ]
+            },
+            {
+                title: "98% Match",
+                movies: [
+                    { t: "Edge of Tomorrow", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQhAE5srmeTqQkWlLkd1HXz7lJklVdfGQN2Wdn5bQqZr7uI3njpbk8AqXRFzqaJ_5D14if0EQ&s=10" },
+                    { t: "Prometheus", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSWkPWq2QOZ7DDLVG-P6uslDOAVDGsOR-JU1gzM1W23HEofDLadRUYoJVe0jBSL89fSxygJwA&s=10" },
+                    { t: "District 9", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS6GMsN1WdXnTPrGp6JwfhN7_OKBspMSFp-GdCwkc8KLhB_WsnLWTsPoeZQXtA6gts2sMB5&s=10" },
+                    { t: "Passengers", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTOyFHQSapOW48gwawchjbLyed1rWOfeoV1mlIo_sfbBtMYCgtZmwrgLAZKxRzzkKIdBdyI&s=10" },
+                    { t: "Star Trek", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQTZDcQHnI0TwFZlHMHPUyVDrLOASum0YcvGUgiEQLcHP38DQC08TEw09yQUcpcfZwU-PBCrQ&s=10" },
+                    { t: "Battlestar Galactica", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSxnQXYdVOD6h0VK5eiQZCrdA4PRjZ6FcgVCEW54KzAIGQB9aVLjFO_EO7pptXfLcjp8OSl&s=10" }
+                ]
+            }
+        ];
+
+        const modeBRows = [
+            {
+                title: "Critically Acclaimed Documentaries",
+                movies: [
+                    { t: "Our Planet", img: "https://cdn2.penguin.com.au/covers/original/9781473569225.jpg" },
+                    { t: "13th", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTF9U9IyPBwg9VVCg5mL3u5SAMqUtzW1TTkqaSGl0LfTMQ5yORJO1ZSyKiFCuXcyHGo8z-I&s=10" },
+                    { t: "My Octopus Teacher", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQDOz6U5DGNIyC2e3Nai6cSM_h9HvMUYJ7q1EcEZQ7jd_9qg7pUzcmXR3wGznxQsY_f4Z-J&s=10" },
+                    { t: "The Last Dance", img: "https://conservativechristianapologist.com/wp-content/uploads/2022/12/images.jpeg?w=682" },
+                    { t: "Icarus", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ1nq-QtbjsXWshePRHVLUPXFhkPUE9W0X8RVrRyTjgQYUJTcdP" },
+                    { t: "Free Solo", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTBZsybrQt_6HjOAYxblkdm6E5dJO7K8xHSIq70r3X4CP5HQAteuGhPT8ewzklCO0OWTeBNTA&s=10" }
+                ]
+            },
+            {
+                title: "Asian Cinema Spotlight",
+                movies: [
+                    { t: "Parasite", img: "https://images.preview.ph/preview/images/2022/05/11/81221938_Parasite_En_En_display-art_1142x1600_vertical20220510-4471-g76b9h-(1).jpg" },
+                    { t: "Minari", img: "https://resizing.flixster.com/fnACvWmb3eeyT3uWd-7QFU4ljAQ=/fit-in/705x460/v2/https://resizing.flixster.com/-XZAfHZM39UwaGJIFWKAE8fS0ak=/v3/t/assets/p18329360_v_v10_ak.jpg" },
+                    { t: "Spirited Away", img: "https://m.media-amazon.com/images/M/MV5BMjlmZmI5MDctNDE2YS00YWE0LWE5ZWItZDBhYWQ0NTcxNWRhXkEyXkFqcGdeQXVyMTMxODk2OTU@._V1_.jpg" },
+                    { t: "Train to Busan", img: "https://m.media-amazon.com/images/M/MV5BMTkwOTQ4OTg0OV5BMl5BanBnXkFtZTgwMzQyOTM0OTE@._V1_.jpg" },
+                    { t: "Squid Game", img: "https://puzzlemania-154aa.kxcdn.com/products/2024/puzzle-clementoni-1000-pieces-netflix-squid-game.webp" },
+                    { t: "Everything Everywhere", img: "https://play-lh.googleusercontent.com/_YueHogQgm2ToFb8lzi09rZi-b-zapDME1hf9Ej1d5MMAI0sKeU7HcTOc_lPIvNP5dXvOFBevKcYvqPbJ2I" }
+                ]
+            },
+            {
+                title: "International Award Winners",
+                movies: [
+                    { t: "Roma", img: "https://resizing.flixster.com/qlObzLY5-tC9pwG_hGinHqbXQjI=/fit-in/705x460/v2/https://resizing.flixster.com/-XZAfHZM39UwaGJIFWKAE8fS0ak=/v3/t/assets/p15849821_v_v8_aa.jpg" },
+                    { t: "Dark (TV)", img: "https://static.wixstatic.com/media/ffadbf_b75a58824dbd463ea605cb332c259897~mv2.png/v1/fill/w_480,h_680,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/ffadbf_b75a58824dbd463ea605cb332c259897~mv2.png" },
+                    { t: "Lupin", img: "https://static.wikia.nocookie.net/netflix/images/8/86/Lupinposter1.png/revision/latest?cb=20210510184101" },
+                    { t: "Life is Beautiful", img: "https://m.media-amazon.com/images/M/MV5BYmJmM2Q4NmMtYThmNC00ZjRlLWEyZmItZTIwOTBlZDQ3NTQ1XkEyXkFqcGdeQXVyMTQxNzMzNDI@._V1_.jpg" },
+                    { t: "City of God", img: "https://i.redd.it/lrlihog2s4tc1.png" }
+                ]
+            },
+            {
+                title: "Indie & Hidden Gems",
+                movies: [
+                    { t: "The Florida Project", img: "https://i0.wp.com/tsl.news/wp-content/uploads/2018/12/The-Florida-Project-poster.jpg?resize=715%2C1050&ssl=1" },
+                    { t: "Lady Bird", img: "https://m.media-amazon.com/images/S/pv-target-images/249b60dcd65e4ba17882d43310dcaa8f30b1840ea7bc2d7e0089e5a5398aa55f.jpg" },
+                    { t: "Moonlight", img: "https://m.media-amazon.com/images/M/MV5BNzQxNTIyODAxMV5BMl5BanBnXkFtZTgwNzQyMDA3OTE@._V1_.jpg" },
+                    { t: "Ex Machina", img: "https://a.ltrbxd.com/resized/film-poster/1/8/7/9/8/6/187986-ex-machina-0-230-0-345-crop.jpg?v=2b4212d498" },
+                    { t: "Her", img: "https://m.media-amazon.com/images/M/MV5BMjA1Nzk0OTM2OF5BMl5BanBnXkFtZTgwNjU2NjEwMDE@._V1_.jpg" },
+                    { t: "Eternal Sunshine", img: "https://m.media-amazon.com/images/M/MV5BMTY4NzcwODg3Nl5BMl5BanBnXkFtZTcwNTEwOTMyMw@@._V1_.jpg" }
+                ]
+            }
+        ];
+
+        const container = document.getElementById('rows-container');
+        const modeStatus = document.getElementById('mode-status');
+
+        function renderRows(mode) {
+            container.innerHTML = ''; 
+            
+            const data = mode === 'A' ? modeARows : modeBRows;
+            const borderClass = mode === 'A' ? 'mode-a-active' : 'mode-b-active';
+
+            data.forEach(row => {
+                const rowTitle = document.createElement('h2');
+                rowTitle.className = `text-xl md:text-2xl font-bold mb-4 pl-4 md:pl-0 ${mode === 'B' ? 'text-green-400' : 'text-gray-100'}`;
+                rowTitle.innerText = row.title;
+                if(mode === 'B') rowTitle.innerHTML += ` <span class="text-xs font-normal text-white bg-green-600 px-2 rounded ml-2 align-middle">Unfiltered</span>`;
+                
+                const scrollContainer = document.createElement('div');
+                scrollContainer.className = `flex gap-4 overflow-x-scroll hide-scroll pb-8 ${borderClass}`;
+                
+                row.movies.forEach(movie => {
+                    const poster = document.createElement('div');
+                    poster.className = 'flex-none w-[140px] md:w-[180px] cursor-pointer row-poster relative';
+                    
+                    poster.innerHTML = `
+                        <img src="${movie.img}" class="rounded-md w-full h-[210px] md:h-[270px] object-cover">
+                        <div class="absolute inset-0 bg-black/60 opacity-0 hover:opacity-100 transition duration-300 flex items-end p-2 rounded-md">
+                            <span class="text-xs md:text-sm font-bold text-center w-full drop-shadow-md">${movie.t}</span>
+                        </div>
+                    `;
+                    scrollContainer.appendChild(poster);
+                });
+
+                container.appendChild(rowTitle);
+                container.appendChild(scrollContainer);
+            });
+        }
+
+        function toggleMode() {
+            const toggle = document.getElementById('mode-toggle');
+            
+            if (toggle.checked) {
+                modeStatus.innerText = "Discovery Mode (Override)";
+                modeStatus.classList.add("text-green-400");
+                renderRows('B');
+            } else {
+                modeStatus.innerText = "Match History (Agent)";
+                modeStatus.classList.remove("text-green-400");
+                renderRows('A');
+            }
+        }
+
+        renderRows('A');
+    </script>
+</body>
+</html>
